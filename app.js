@@ -1,7 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import { DATABASE_URL } from './env.js';
 
-mongoose.connect('mongodb+srv://sangfjrzl:<ShbGijfB6WyTdSxN>@jogackjip.cskhu.mongodb.net/?retryWrites=true&w=majority&appName=JoGackJip');
+mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 
 const app = express();
 
