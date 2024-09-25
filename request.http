@@ -1,3 +1,17 @@
 GET https://backend-repository-t82r.onrender.com/hello
+Content-Type: : application/json
 
+####
+POST https://backend-repository-t82r.onrender.com/api/groups
+Content-Type: : application/json
 
+{
+    "name": "test",
+    "password":"abcde",
+    "isPublic":true,
+    "introduction": "해위",
+    "likeCount": 4,
+    "badges": ["김옥지"],
+    "postCount": 0,
+    "post":["test"],
+}
