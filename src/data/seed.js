@@ -8,8 +8,4 @@ mongoose.connect(DATABASE_URL);
 await Group.deleteMany({});
 await Group.insertMany({data});
 
-
-
-
-
 mongoose.connection.close();
