@@ -4,7 +4,12 @@ import { DATABASE_URL } from './env.js';
 import groupRoutes from './routes/groupRoutes.js';
 import Group from './models/GroupSchema.js';
 
-mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
+mongoose.connect(DATABASE_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,})
+    .then(() => console.log('Connected to DB'));
 
 const app = express();
 
@@ -18,12 +23,20 @@ app.get('/hello', (req, res) => {
 
 app.post('/api/groups', (req, res) => {
     const group = new Group(req.body);
-    group.save((err, groupInfo) => {
-        if (err) return res.json({ success: false, err });
-        return res.status(200).json({
-          success: true,
-        });
-    })
+    console.log(group);
+
+    db.collection('groups').insertOne({
+        name: group.name,
+        password: group.password,
+        isPublic: group.isPublic,
+        introduction: group.introduction,
+        likeCount: group.likeCount,
+        badges: group.badges,
+        postCount: group.postCount,
+        post: group.post,
+    }, (error, result)=>{
+        res.status(200).send({message: '가입 성공'});
+    });
 });
 
 

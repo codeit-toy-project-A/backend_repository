@@ -11,8 +11,5 @@ Content-Type: : application/json
     "isPublic":true,
     "introduction": "해위",
     "likeCount": 4,
-    "badges": ["김옥지"],
-    "postCount": 0,
-    "post":["test"],
 }
 
