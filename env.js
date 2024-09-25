@@ -1,1 +1,0 @@
-export const DATABASE_URL = 'mongodb+srv://sangfjrzl:ShbGijfB6WyTdSxN@jogackjip.cskhu.mongodb.net/?retryWrites=true&w=majority&appName=JoGackJip'
