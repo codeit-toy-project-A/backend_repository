@@ -1,34 +1,36 @@
 class GroupService {
     // 그룹 생성
-    async createGroup(req, res) {
+    async createGroup(data) {
+        const { password, ...rest } = data;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        return groupRepository.createGroup({ ...rest, password: hashedPassword });
+    }
+
+    async updateGroup() {
 
     }
 
-    async updateGroup(req, res) {
+    async deleteGroup() {
 
     }
 
-    async deleteGroup(req, res) {
+    async getGroups() {
 
     }
 
-    async getGroups(req, res) {
+    async getGroupById() {
 
     }
 
-    async getGroupById(req, res) {
+    async likeGroup() {
 
     }
 
-    async likeGroup(req, res) {
+    async verifyPassword() {
 
     }
 
-    async verifyPassword(req, res) {
-
-    }
-
-    async isPublic(req, res) {
+    async isPublic() {
 
     }
 }
