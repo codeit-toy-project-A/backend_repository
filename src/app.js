@@ -3,12 +3,9 @@ import mongoose from 'mongoose';
 import { DATABASE_URL } from './env.js';
 import groupRoutes from './routes/groupRoutes.js';
 import Group from './models/GroupSchema.js';
+import { MongoClient } from 'mongodb';
 
-mongoose.connect(DATABASE_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,})
+mongoose.connect(DATABASE_URL)
     .then(() => console.log('Connected to DB'));
 
 const app = express();
@@ -20,11 +17,13 @@ app.get('/hello', (req, res) => {
 })
 
 // 그룹 생성
+const client = new MongoClient(DATABASE_URL);
 
-app.post('/api/groups', (req, res) => {
+app.post('/api/groups', async (req, res) => {
+
     const group = new Group(req.body);
-    console.log(group);
-
+    await client.connect();
+    const db = client.db("test");
     db.collection('groups').insertOne({
         name: group.name,
         password: group.password,
