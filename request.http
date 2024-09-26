@@ -10,6 +10,6 @@ Content-Type: application/json
     "password":"abcde",
     "isPublic": false,
     "introduction": "해위",
-    "likeCount": 4,
+    "likeCount": 4
 }
 
