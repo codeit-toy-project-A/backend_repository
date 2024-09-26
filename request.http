@@ -1,14 +1,26 @@
 GET https://backend-repository-t82r.onrender.com/hello
-Content-Type: : application/json
+Content-Type: application/json
 
 ####
 POST https://backend-repository-t82r.onrender.com/api/groups
 Content-Type: application/json
 
 {
+    "groupId": 1,
     "name": "test",
     "password":"abcde",
     "isPublic": false,
     "introduction": "해위",
     "likeCount": 4
+}
+
+PATCH  https://backend-repository-t82r.onrender.com/api/groups/1
+Content-Type: application/json
+
+{
+    "name": "test2",
+    "password":"abcded",
+    "isPublic": true,
+    "introduction": "배위",
+    "likeCount": 6
 }

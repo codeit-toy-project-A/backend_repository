@@ -43,6 +43,7 @@ app.put('/api/groups/:groupId', async (req, res) => {
     }
 });
 
+// 그룹 삭제
 app.delete('/api/groups/:groupId', async (req, res) => {
     try {
         const { groupId } = req.params; 
