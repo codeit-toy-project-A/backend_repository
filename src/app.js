@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import { DATABASE_URL } from './env.js';
 import groupRoutes from './routes/groupRoutes.js';
 import Group from './models/GroupSchema.js';
-import { MongoClient } from 'mongodb';
 
 mongoose.connect(DATABASE_URL)
     .then(() => console.log('Connected to DB'));
@@ -17,25 +16,14 @@ app.get('/hello', (req, res) => {
 })
 
 // 그룹 생성
-const client = new MongoClient(DATABASE_URL);
-
 app.post('/api/groups', async (req, res) => {
-
-    const group = new Group(req.body);
-    await client.connect();
-    const db = client.db("test");
-    db.collection('groups').insertOne({
-        name: group.name,
-        password: group.password,
-        isPublic: group.isPublic,
-        introduction: group.introduction,
-        likeCount: group.likeCount,
-        badges: group.badges,
-        postCount: group.postCount,
-        post: group.post,
-    }, (error, result)=>{
-        res.status(200).send({message: '가입 성공'});
-    });
+    try {
+        const group = new Group(req.body);
+        const savedGroup = await group.save();  // Mongoose의 save 메서드 사용
+        res.status(201).send({ message: '그룹 생성 성공', group: savedGroup });
+    } catch (error) {
+        res.status(400).send({ error: '그룹 생성 실패', details: error });
+    }
 });
 
 

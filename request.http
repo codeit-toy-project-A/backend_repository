@@ -3,13 +3,12 @@ Content-Type: : application/json
 
 ####
 POST https://backend-repository-t82r.onrender.com/api/groups
-Content-Type: : application/json
+Content-Type: application/json
 
 {
     "name": "test",
     "password":"abcde",
-    "isPublic":true,
+    "isPublic": false,
     "introduction": "해위",
-    "likeCount": 4,
+    "likeCount": 4
 }
-
