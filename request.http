@@ -6,7 +6,6 @@ POST https://backend-repository-t82r.onrender.com/api/groups
 Content-Type: application/json
 
 {
-    "groupId": 1,
     "name": "test",
     "password":"abcde",
     "isPublic": false,
@@ -15,7 +14,7 @@ Content-Type: application/json
 }
 
 ####
-PATCH  https://backend-repository-t82r.onrender.com/api/groups/1
+PUT  https://backend-repository-t82r.onrender.com/api/groups/1
 Content-Type: application/json
 
 {

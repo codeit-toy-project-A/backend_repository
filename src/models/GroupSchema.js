@@ -1,9 +1,7 @@
 import mongoose from "mongoose";
 
 const GroupSchema = new mongoose.Schema (
-    {   groupId : {
-            type: Number,
-        },
+    {   
         name: {
             type: String,
         },
@@ -29,8 +27,8 @@ const GroupSchema = new mongoose.Schema (
         post: {
             type: Array,
         }
-
     },
+    
     {
         timestamps : true,
     }
