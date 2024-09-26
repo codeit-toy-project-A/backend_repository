@@ -24,7 +24,7 @@ app.post('/api/groups', async (req, res) => {
     const group = new Group(req.body);
     await client.connect();
     const db = client.db("test");
-    db.collection('groups').insertOne({
+    db.collection('groups').save({
         name: group.name,
         password: group.password,
         isPublic: group.isPublic,
