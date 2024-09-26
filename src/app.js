@@ -32,7 +32,7 @@ app.put('/api/groups/:groupId', async (req, res) => {
         const { groupId } = req.params;
         const updateData = req.body;
 
-        const updateGroup = await Group.findByIdAndUpdate(groupId, updateData, {new: true});
+        const updateGroup = await Group.findOneAndUpdate(groupId, updateData, {new: true});
         if (!updateGroup) {
             return res.status(404).send({message: '그룹 찾기 실패'});
         }
