@@ -14,7 +14,8 @@ Content-Type: application/json
 }
 
 ####
-PUT  https://backend-repository-t82r.onrender.com/api/groups/1
+PUT  https://backend-repository-t82r.onrender.com/api/groups/66f58e34705081fd36c5d77e
+
 Content-Type: application/json
 
 {
