@@ -32,14 +32,16 @@ app.put('/api/groups/:groupId', async (req, res) => {
         const { groupId } = req.params;
         const updateData = req.body;
 
-        const updateGroup = await Group.findOneAndUpdate(groupId, updateData, {new: true});
+        const updateGroup = await Group.findOneAndUpdate({ groupId: groupId }, updateData, { new: true });
+        
         if (!updateGroup) {
-            return res.status(404).send({message: '그룹 찾기 실패'});
+            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
-        res.status(200).send({message : '수정에 성공했습니다.', group : updateGroup});
+
+        res.status(200).send({ message: '수정에 성공했습니다.', group: updateGroup });
 
     } catch (error) {
-        res.status(400).send({message : '그룹 수정 실패', error});
+        res.status(400).send({ message: '그룹 수정 실패', error });
     }
 });
 
