@@ -26,6 +26,37 @@ app.post('/api/groups', async (req, res) => {
     }
 });
 
+// 그룹 수정
+app.put('/api/groups/:groupId', async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const updateData = req.body;
+
+        const updateGroup = await Group.findByIdAndUpdate(groupId, updateData, {new: true});
+        if (!updateGroup) {
+            return res.status(404).send({message: '그룹 찾기 실패'});
+        }
+        res.status(200).send({message : '수정에 성공했습니다.', group : updateGroup});
+
+    } catch (error) {
+        res.status(400).send({message : '그룹 수정 실패', error});
+    }
+});
+
+app.delete('/api/groups/:groupId', async (req, res) => {
+    try {
+        const { groupId } = req.params; 
+
+        const deletedGroup = await Group.findByIdAndDelete(groupId);
+        if (!deletedGroup) {
+            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+        }
+
+        res.status(200).send({ message: '그룹 삭제 성공' });
+    } catch (error) {
+        res.status(400).send({ message: '그룹 삭제 실패', error });
+    }
+});
 
 app.use('/api', groupRoutes);
 
