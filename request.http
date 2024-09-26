@@ -25,3 +25,6 @@ Content-Type: application/json
     "introduction": "배위",
     "likeCount": 6
 }
+
+####
+DELETE https://backend-repository-t82r.onrender.com/api/groups/66f58e34705081fd36c5d77e
