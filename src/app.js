@@ -5,6 +5,7 @@ import path from 'path';
 import { DATABASE_URL } from './env.js';
 import groupRoutes from './routes/groupRoutes.js';
 import Group from './models/GroupSchema.js';
+import fs from 'fs';
 
 // MongoDB 연결
 mongoose.connect(DATABASE_URL)
