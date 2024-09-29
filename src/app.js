@@ -6,6 +6,7 @@ import { DATABASE_URL } from './env.js';
 import groupRoutes from './routes/groupRoutes.js';
 import Group from './models/GroupSchema.js';
 import fs from 'fs';
+import bcrypt from 'bcrypt';
 
 // MongoDB 연결
 mongoose.connect(DATABASE_URL)
@@ -32,13 +33,16 @@ const storage = multer.diskStorage({
     }
 });
 
-
 const upload = multer({ storage: storage });
 
 // 그룹 생성 요청 처리 (이미지 업로드 포함)
 app.post('/api/groups', upload.single('image'), async (req, res) => {
     try {
         const groupData = req.body;
+
+        // 비밀번호 해싱
+        const hashedPassword = await bcrypt.hash(groupData.password, 10);
+        groupData.password = hashedPassword; // 해싱한 비밀번호로 설정
 
         // 이미지 파일이 업로드된 경우에만 imageUrl을 설정
         if (req.file) {
@@ -54,7 +58,6 @@ app.post('/api/groups', upload.single('image'), async (req, res) => {
     }
 });
 
-
 // 그룹 수정
 app.put('/api/groups/:id', async (req, res) => {
     try {
@@ -68,7 +71,8 @@ app.put('/api/groups/:id', async (req, res) => {
         }
 
         // 비밀번호 검증
-        if (group.password != password) {
+        const isPasswordValid = await bcrypt.compare(password, group.password); // 해시된 비밀번호 비교
+        if (!isPasswordValid) {
             return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
         }
 
@@ -94,7 +98,8 @@ app.delete('/api/groups/:groupId', async (req, res) => {
         }
 
         // 비밀번호 검증
-        if (group.password != password) {
+        const isPasswordValid = await bcrypt.compare(password, group.password); // 해시된 비밀번호 비교
+        if (!isPasswordValid) {
             return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
         }
 
@@ -167,8 +172,11 @@ app.get('/api/groups/:id', async (req, res) => {
         }
 
         // 비공개 그룹의 경우 비밀번호 확인
-        if (!group.isPublic && group.password != password) {
-            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+        if (!group.isPublic) {
+            const isPasswordValid = await bcrypt.compare(password, group.password); // 해시된 비밀번호 비교
+            if (!isPasswordValid) {
+                return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+            }
         }
 
         // 디데이 계산
@@ -207,8 +215,6 @@ app.post('/api/groups/:id/like', async (req, res) => {
         res.status(400).send({ message: '공감 추가 실패', error });
     }
 });
-
-
 
 // 정적 파일 제공 (이미지 파일 접근 가능하게)
 app.use('/uploads', express.static('uploads'));
