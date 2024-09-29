@@ -68,7 +68,7 @@ app.put('/api/groups/:id', async (req, res) => {
         }
 
         // 비밀번호 검증
-        if (group.password !== password) {
+        if (group.password != password) {
             return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
         }
 
@@ -94,7 +94,7 @@ app.delete('/api/groups/:groupId', async (req, res) => {
         }
 
         // 비밀번호 검증
-        if (group.password !== password) {
+        if (group.password != password) {
             return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
         }
 
@@ -114,8 +114,8 @@ app.get('/api/groups', async (req, res) => {
 
         // 검색 조건 생성
         let filter = {};
-        if (isPublic !== undefined) {
-            filter.isPublic = isPublic === 'true';  // 공개 그룹 필터
+        if (isPublic != undefined) {
+            filter.isPublic = isPublic == 'true';  // 공개 그룹 필터
         }
         if (search) {
             filter.name = { $regex: search, $options: 'i' };  // 그룹명 검색
@@ -123,13 +123,13 @@ app.get('/api/groups', async (req, res) => {
 
         // 정렬 옵션
         let sortOption = {};
-        if (sortBy === 'recent') {
+        if (sortBy == 'recent') {
             sortOption = { createdAt: -1 };  // 최신순
-        } else if (sortBy === 'posts') {
+        } else if (sortBy == 'posts') {
             sortOption = { postCount: -1 };  // 게시글 많은순
-        } else if (sortBy === 'likes') {
+        } else if (sortBy == 'likes') {
             sortOption = { likeCount: -1 };  // 공감순
-        } else if (sortBy === 'badges') {
+        } else if (sortBy == 'badges') {
             sortOption = { badges: -1 };  // 획득 배지순
         }
 
@@ -167,7 +167,7 @@ app.get('/api/groups/:id', async (req, res) => {
         }
 
         // 비공개 그룹의 경우 비밀번호 확인
-        if (!group.isPublic && group.password !== password) {
+        if (!group.isPublic && group.password != password) {
             return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
         }
 
