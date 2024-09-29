@@ -10,11 +10,11 @@ Content-Type: application/json
     "password":"abcde",
     "isPublic": false,
     "introduction": "해위",
-    "likeCount": 4
+    "likeCount": 4,
 }
 
 ####
-PUT  https://backend-repository-t82r.onrender.com/api/groups/66f58e34705081fd36c5d77e
+PUT  https://backend-repository-t82r.onrender.com/api/groups/66f903ca60b3e7e12e8374db
 
 Content-Type: application/json
 
@@ -27,4 +27,5 @@ Content-Type: application/json
 }
 
 ####
-DELETE https://backend-repository-t82r.onrender.com/api/groups/66f58e34705081fd36c5d77e
+DELETE https://backend-repository-t82r.onrender.com/api/groups/66f903ca60b3e7e12e8374db
+

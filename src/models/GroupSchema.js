@@ -26,7 +26,10 @@ const GroupSchema = new mongoose.Schema (
         },
         post: {
             type: Array,
-        }
+        },
+        imageUrl: {
+            type: String,
+        },
     },
     
     {
