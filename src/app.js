@@ -183,13 +183,32 @@ app.get('/api/groups/:id', async (req, res) => {
             dDay: dDay,
             badges: group.badges,
             memoryCount: group.postCount,
-            likeCount: group.likeCount,
+            likeCount: group.likeCount,  // 공감 수 포함
             post: group.post,
         });
     } catch (error) {
         res.status(400).send({ message: '그룹 상세 조회 실패', error });
     }
 });
+
+// 공감 보내기
+app.post('/api/groups/:id/like', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // 그룹의 likeCount를 1 증가
+        const group = await Group.findByIdAndUpdate(id, { $inc: { likeCount: 1 } }, { new: true });
+        if (!group) {
+            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+        }
+
+        res.status(200).send({ message: '공감이 추가되었습니다.', likeCount: group.likeCount });
+    } catch (error) {
+        res.status(400).send({ message: '공감 추가 실패', error });
+    }
+});
+
+
 
 // 정적 파일 제공 (이미지 파일 접근 가능하게)
 app.use('/uploads', express.static('uploads'));
