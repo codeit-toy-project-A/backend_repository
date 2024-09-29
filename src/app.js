@@ -15,15 +15,22 @@ const app = express();
 // JSON 데이터 파싱
 app.use(express.json());
 
+// 업로드 폴더 확인 및 생성
+const uploadDir = path.resolve('./uploads');  // 절대 경로로 설정
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
 // Multer 설정 (이미지 업로드 처리)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './uploads/');  // 이미지가 저장될 폴더
+        cb(null, uploadDir);  // 절대 경로로 이미지가 저장될 폴더 지정
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + path.extname(file.originalname));  // 파일 이름 중복 방지
     }
 });
+
 
 const upload = multer({ storage: storage });
 
