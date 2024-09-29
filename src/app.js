@@ -18,7 +18,7 @@ app.use(express.json());
 // Multer 설정 (이미지 업로드 처리)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/');  // 이미지가 저장될 폴더
+        cb(null, './uploads/');  // 이미지가 저장될 폴더
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + path.extname(file.originalname));  // 파일 이름 중복 방지
@@ -34,7 +34,7 @@ app.post('/api/groups', upload.single('image'), async (req, res) => {
 
         // 이미지 파일이 업로드된 경우에만 imageUrl을 설정
         if (req.file) {
-            groupData.imageUrl = `/uploads/${req.file.filename}`;  // 이미지 경로를 설정
+            groupData.imageUrl = './uploads/${req.file.filename}';  // 이미지 경로를 설정
         }
 
         const newGroup = new Group(groupData);
@@ -43,6 +43,41 @@ app.post('/api/groups', upload.single('image'), async (req, res) => {
         res.status(201).send({ message: '그룹 생성 성공', group: newGroup });
     } catch (error) {
         res.status(400).send({ message: '그룹 생성 실패', error });
+    }
+});
+
+
+// 그룹 수정
+app.put('/api/groups/:id', async (req, res) => {
+    try {
+        const { id } = req.params; 
+        const updateData = req.body;
+
+        const updatedGroup = await Group.findByIdAndUpdate(id, updateData, { new: true });
+
+        if (!updatedGroup) {
+            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+        }
+
+        res.status(200).send({ message: '수정에 성공했습니다.', group: updatedGroup });
+    } catch (error) {
+        res.status(400).send({ message: '그룹 수정 실패', error });
+    }
+});
+
+// 그룹 삭제
+app.delete('/api/groups/:groupId', async (req, res) => {
+    try {
+        const { groupId } = req.params; 
+
+        const deletedGroup = await Group.findByIdAndDelete(groupId);
+        if (!deletedGroup) {
+            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+        }
+
+        res.status(200).send({ message: '그룹 삭제 성공' });
+    } catch (error) {
+        res.status(400).send({ message: '그룹 삭제 실패', error });
     }
 });
 
