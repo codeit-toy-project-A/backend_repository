@@ -34,7 +34,7 @@ app.post('/api/groups', upload.single('image'), async (req, res) => {
 
         // 이미지 파일이 업로드된 경우에만 imageUrl을 설정
         if (req.file) {
-            groupData.imageUrl = './uploads/${req.file.filename}';  // 이미지 경로를 설정
+            groupData.imageUrl = `./uploads/${req.file.filename}`;  // 이미지 경로를 설정
         }
 
         const newGroup = new Group(groupData);
