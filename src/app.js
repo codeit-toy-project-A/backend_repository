@@ -160,7 +160,7 @@ app.get('/api/groups', async (req, res) => {
 });
 
 // 그룹 상세 조회
-app.get('/api/groups/:id', async (req, res) => {
+app.get('/api/groups/:groupId', async (req, res) => {
     try {
         const { id } = req.params;
         const { password } = req.query;  // 비공개 그룹 비밀번호를 쿼리로 받음
@@ -191,7 +191,7 @@ app.get('/api/groups/:id', async (req, res) => {
             dDay: dDay,
             badges: group.badges,
             memoryCount: group.postCount,
-            likeCount: group.likeCount,  // 공감 수 포함
+            likeCount: group.likeCount,  
             post: group.post,
         });
     } catch (error) {
@@ -199,8 +199,8 @@ app.get('/api/groups/:id', async (req, res) => {
     }
 });
 
-// 공감 보내기
-app.post('/api/groups/:id/like', async (req, res) => {
+// 공감 보내기 (프론트 미확인)
+app.post('/api/groups/:groupId/like', async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -223,3 +223,7 @@ app.use('/api', groupRoutes);
 
 // 서버 시작
 app.listen(3000, () => console.log('Server Started'));
+
+// ------------------------------------------------------- //
+
+// 게시물 기능
