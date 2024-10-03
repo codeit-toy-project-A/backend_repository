@@ -57,15 +57,14 @@ app.post('/api/groups', upload.single('image'), async (req, res) => {
         res.status(400).send({ message: '그룹 생성 실패', error });
     }
 });
-
 // 그룹 수정
 app.put('/api/groups/:groupId', async (req, res) => {
     try {
-        const { id } = req.params;
+        const { groupId } = req.params;  // groupId로 통일
         const { password, ...updateData } = req.body;  // 비밀번호와 수정할 데이터를 분리
 
         // 그룹 찾기
-        const group = await Group.findById(id);
+        const group = await Group.findById(groupId);  // groupId 사용
         if (!group) {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
@@ -77,7 +76,7 @@ app.put('/api/groups/:groupId', async (req, res) => {
         }
 
         // 비밀번호 일치 시 수정
-        const updatedGroup = await Group.findByIdAndUpdate(id, updateData, { new: true });
+        const updatedGroup = await Group.findByIdAndUpdate(groupId, updateData, { new: true });  // groupId 사용
 
         res.status(200).send({ message: '수정에 성공했습니다.', group: updatedGroup });
     } catch (error) {
@@ -88,11 +87,11 @@ app.put('/api/groups/:groupId', async (req, res) => {
 // 그룹 삭제
 app.delete('/api/groups/:groupId', async (req, res) => {
     try {
-        const { id } = req.params;
+        const { groupId } = req.params;  // groupId로 통일
         const { password } = req.body;  // 요청 본문에서 비밀번호 받기
 
         // 그룹 찾기
-        const group = await Group.findById(id);
+        const group = await Group.findById(groupId);  // groupId 사용
         if (!group) {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
@@ -104,7 +103,7 @@ app.delete('/api/groups/:groupId', async (req, res) => {
         }
 
         // 비밀번호 일치 시 삭제
-        await Group.findByIdAndDelete(groupId);
+        await Group.findByIdAndDelete(groupId);  // groupId 사용
 
         res.status(200).send({ message: '그룹 삭제 성공' });
     } catch (error) {
@@ -158,31 +157,28 @@ app.get('/api/groups', async (req, res) => {
         res.status(400).send({ message: '그룹 목록 조회 실패', error });
     }
 });
-
 // 그룹 상세 조회
 app.get('/api/groups/:groupId', async (req, res) => {
     try {
-        const { id } = req.params;
-        const { password } = req.query;  // 비공개 그룹 비밀번호를 쿼리로 받음
+        const { groupId } = req.params;
+        const { password } = req.query;
 
         // 그룹 찾기
-        const group = await Group.findById(id);
+        const group = await Group.findById(groupId);
         if (!group) {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
 
         // 비공개 그룹의 경우 비밀번호 확인
         if (!group.isPublic) {
-            const isPasswordValid = await bcrypt.compare(password, group.password); // 해시된 비밀번호 비교
+            const isPasswordValid = await bcrypt.compare(password, group.password);
             if (!isPasswordValid) {
                 return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
             }
         }
 
-        // 디데이 계산
         const dDay = Math.floor((Date.now() - new Date(group.createdAt)) / (1000 * 60 * 60 * 24));
 
-        // 그룹 상세 정보 반환
         res.status(200).send({
             imageUrl: group.imageUrl,
             name: group.name,
@@ -191,7 +187,7 @@ app.get('/api/groups/:groupId', async (req, res) => {
             dDay: dDay,
             badges: group.badges,
             memoryCount: group.postCount,
-            likeCount: group.likeCount,  
+            likeCount: group.likeCount,
             post: group.post,
         });
     } catch (error) {
@@ -199,13 +195,13 @@ app.get('/api/groups/:groupId', async (req, res) => {
     }
 });
 
-// 공감 보내기 (프론트 미확인)
+// 공감 보내기
 app.post('/api/groups/:groupId/like', async (req, res) => {
     try {
-        const { id } = req.params;
+        const { groupId } = req.params;
 
         // 그룹의 likeCount를 1 증가
-        const group = await Group.findByIdAndUpdate(id, { $inc: { likeCount: 1 } }, { new: true });
+        const group = await Group.findByIdAndUpdate(groupId, { $inc: { likeCount: 1 } }, { new: true });
         if (!group) {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
