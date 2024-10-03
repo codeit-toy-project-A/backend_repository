@@ -61,11 +61,11 @@ app.post('/api/groups', upload.single('image'), async (req, res) => {
 // 그룹 수정
 app.put('/api/groups/:groupId', async (req, res) => {
     try {
-        const { groupId } = req.params;
+        const { id } = req.params;
         const { password, ...updateData } = req.body;  // 비밀번호와 수정할 데이터를 분리
 
         // 그룹 찾기
-        const group = await Group.findById(groupId);
+        const group = await Group.findById(id);
         if (!group) {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
@@ -88,11 +88,11 @@ app.put('/api/groups/:groupId', async (req, res) => {
 // 그룹 삭제
 app.delete('/api/groups/:groupId', async (req, res) => {
     try {
-        const { groupId } = req.params;
+        const { id } = req.params;
         const { password } = req.body;  // 요청 본문에서 비밀번호 받기
 
         // 그룹 찾기
-        const group = await Group.findById(groupId);
+        const group = await Group.findById(id);
         if (!group) {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
