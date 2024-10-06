@@ -238,23 +238,21 @@ app.listen(3000, () => console.log('Server Started'));
 
 app.post('/api/groups/:groupId/posts', async (req, res) => {
     try {
-        const { nickname, title, content, postPassword, groupPassword, imageUrl, tags, location, moment, isPublic, groupId } = req.body;
+        const { nickname, title, content, postPassword, groupPassword, imageUrl, tags, location, moment, isPublic } = req.body;
+        const { groupId } = req.params;  // URL에서 groupId를 가져옴
 
-        // 비밀번호 해시 처리 (비공개 글일 경우)
-        const hashedPassword = postPassword ? await bcrypt.hash(password, 10) : null;
+        const hashedPassword = postPassword ? await bcrypt.hash(postPassword, 10) : null;
 
-        const group = await Group.findById(groupId);  // groupId 사용
+        const group = await Group.findById(groupId); 
         if (!group) {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
 
-        // 비밀번호 검증
-        const isPasswordValid = await bcrypt.compare(groupPassword, group.password); // 해시된 비밀번호 비교
+        const isPasswordValid = await bcrypt.compare(groupPassword, group.password);
         if (!isPasswordValid) {
-            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+            return res.status(403).send({ message: '그룹 비밀번호가 일치하지 않습니다.' });
         }
 
-        // 새로운 게시글 생성
         const newPost = new Post({
             groupId,
             nickname,
@@ -265,8 +263,7 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
             location,
             moment,
             isPublic,
-            postPassword: hashedPassword,
-            
+            postPassword: hashedPassword
         });
 
         await newPost.save();
@@ -275,4 +272,5 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
         res.status(400).send({ message: '게시글 등록 실패', error });
     }
 });
+
 
