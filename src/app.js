@@ -254,15 +254,15 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
         }
 
         const newPost = new Post({
-            groupId,
-            nickname,
-            title,
-            content,
-            imageUrl,
-            tags,
-            location,
-            moment,
-            isPublic,
+            groupId : groupId,
+            nickname : nickname,
+            title : title,
+            content : content,
+            imageUrl : imageUrl,
+            tags : tags,
+            location : location,
+            moment : moment,
+            isPublic : isPublic,
             postPassword: hashedPassword
         });
 
