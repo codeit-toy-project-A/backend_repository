@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import multer from 'multer';
 import path from 'path';
 import { DATABASE_URL } from './env.js';
-import groupRoutes from './routes/groupRoutes.js';
 import Group from './models/GroupSchema.js';
 import fs from 'fs';
 import bcrypt from 'bcrypt';
@@ -226,7 +225,6 @@ app.post('/api/groups/:groupId/like', async (req, res) => {
 // 정적 파일 제공 (이미지 파일 접근 가능하게)
 app.use('/uploads', express.static('uploads'));
 
-app.use('/api', groupRoutes);
 
 // 서버 시작
 app.listen(3000, () => console.log('Server Started'));
