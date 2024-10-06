@@ -243,6 +243,9 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
 
         const hashedPostPassword = postPassword ? await bcrypt.hash(postPassword, 10) : null;
 
+        console.log('Group Password:', group.password);
+        console.log('Provided Group Password:', groupPassword);
+        
         const group = await Group.findById(groupId); 
         if (!group) {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
