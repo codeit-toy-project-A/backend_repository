@@ -114,49 +114,60 @@ app.delete('/api/groups/:groupId', async (req, res) => {
 // 그룹 목록 조회
 app.get('/api/groups', async (req, res) => {
     try {
-        const { isPublic, sortBy, search } = req.query;  // 쿼리로 조건을 받음
+        const { isPublic, sortBy, keyword } = req.query;  // 쿼리로 조건을 받음
 
         // 검색 조건 생성
         let filter = {};
         if (isPublic != undefined) {
             filter.isPublic = isPublic == 'true';  // 공개 그룹 필터
         }
-        if (search) {
-            filter.name = { $regex: search, $options: 'i' };  // 그룹명 검색
+        if (keyword) {
+            filter.name = { $regex: keyword, $options: 'i' };  // 그룹명 검색
         }
 
         // 정렬 옵션
         let sortOption = {};
-        if (sortBy == 'recent') {
+        if (sortBy == 'latest') {
             sortOption = { createdAt: -1 };  // 최신순
-        } else if (sortBy == 'posts') {
+        } else if (sortBy == 'mostPosted') {
             sortOption = { postCount: -1 };  // 게시글 많은순
-        } else if (sortBy == 'likes') {
+        } else if (sortBy == 'mostLiked') {
             sortOption = { likeCount: -1 };  // 공감순
-        } else if (sortBy == 'badges') {
+        } else if (sortBy == 'mostBadge') {
             sortOption = { badges: -1 };  // 획득 배지순
         }
 
-        // 그룹 목록 조회
-        const groups = await Group.find(filter).sort(sortOption);
+        // 그룹 목록 및 총 그룹 수 조회
+        const totalItemCount = await Group.countDocuments(filter); // 총 그룹 수
+
+        const groups = await Group.find(filter).sort(sortOption);  // 그룹 목록 조회
 
         // 필요한 필드만 반환
         const groupList = groups.map(group => ({
+            id: group._id,
             imageUrl: group.imageUrl,
             name: group.name,
             introduction: group.introduction,
             isPublic: group.isPublic,
             dDay: Math.floor((Date.now() - new Date(group.createdAt)) / (1000 * 60 * 60 * 24)),  // 디데이 계산
             badgeCount: group.badges.length,
-            memoryCount: group.postCount,
+            postCount: group.postCount,
             likeCount: group.likeCount,
+            createdAt: group.createdAt
         }));
 
-        res.status(200).send(groupList);
+        // 리스폰스 반환
+        res.status(200).send({
+            currentPage: 1, // 고정된 값
+            totalPages: 5,  // 고정된 값
+            totalItemCount, // DB에서 계산된 그룹 총 수
+            data: groupList  // 그룹 목록
+        });
     } catch (error) {
         res.status(400).send({ message: '그룹 목록 조회 실패', error });
     }
 });
+
 // 그룹 상세 조회
 app.get('/api/groups/:groupId', async (req, res) => {
     try {
