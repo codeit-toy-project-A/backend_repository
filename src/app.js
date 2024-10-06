@@ -241,14 +241,15 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
         const { nickname, title, content, postPassword, groupPassword, imageUrl, tags, location, moment, isPublic } = req.body;
         const { groupId } = req.params;  // URL에서 groupId를 가져옴
 
-        const hashedPassword = postPassword ? await bcrypt.hash(postPassword, 10) : null;
+        const hashedPostPassword = postPassword ? await bcrypt.hash(postPassword, 10) : null;
 
         const group = await Group.findById(groupId); 
         if (!group) {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
 
-        const isPasswordValid = await bcrypt.compare(groupPassword, group.password);
+        const hashedGroupPassword = await bcrypt.hash(groupPassword, 10);
+        const isPasswordValid = await bcrypt.compare(hashedGroupPassword, group.password);
         if (!isPasswordValid) {
             return res.status(403).send({ message: '그룹 비밀번호가 일치하지 않습니다.' });
         }
@@ -263,12 +264,13 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
             location : location,
             moment : moment,
             isPublic : isPublic,
-            postPassword: hashedPassword
+            postPassword: hashedPostPassword,
         });
 
         await newPost.save();
         res.status(201).send({ message: '게시글이 성공적으로 등록되었습니다.', post: newPost });
     } catch (error) {
+        console.log(error); 
         res.status(400).send({ message: '게시글 등록 실패', error });
     }
 });
