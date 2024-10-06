@@ -9,12 +9,10 @@ const postSchema = new mongoose.Schema({
     tags: Array,
     location: String,
     moment: Date, 
+    groupPassword: String,
     isPublic: {type: Boolean, default: true},
-    groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' }, // 그룹 참조
-    groupPassword: {type: mongoose.Schema.Types.ObjectId, ref: 'Group'}, // 그룹 비번 참조
     likeCount: { type: Number, default: 0 },
     commentCount: { type: Number, default: 0 },
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }] // 댓글 참조
 },
 
 {
