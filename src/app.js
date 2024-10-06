@@ -248,7 +248,7 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
             return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
         }
 
-        const hashedGroupPassword = await bcrypt.hash(groupPassword, 10);
+        const hashedGroupPassword = groupPassword ? await bcrypt.hash(groupPassword, 10) : null;
         const isPasswordValid = await bcrypt.compare(hashedGroupPassword, group.password);
         if (!isPasswordValid) {
             return res.status(403).send({ message: '그룹 비밀번호가 일치하지 않습니다.' });
