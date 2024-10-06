@@ -6,6 +6,7 @@ import { DATABASE_URL } from './env.js';
 import Group from './models/GroupSchema.js';
 import fs from 'fs';
 import bcrypt from 'bcrypt';
+import Post from './models/postSchema.js';
 
 // MongoDB 연결
 mongoose.connect(DATABASE_URL)
@@ -232,4 +233,46 @@ app.listen(3000, () => console.log('Server Started'));
 // -------------------------------------------------------- //
 
 // 게시물 기능
+
+// 게시물 생성 
+
+app.post('/api/groups/:groupId/posts', async (req, res) => {
+    try {
+        const { nickname, title, content, postPassword, groupPassword, imageUrl, tags, location, moment, isPublic, groupId } = req.body;
+
+        // 비밀번호 해시 처리 (비공개 글일 경우)
+        const hashedPassword = postPassword ? await bcrypt.hash(password, 10) : null;
+
+        const group = await Group.findById(groupId);  // groupId 사용
+        if (!group) {
+            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+        }
+
+        // 비밀번호 검증
+        const isPasswordValid = await bcrypt.compare(groupPassword, group.password); // 해시된 비밀번호 비교
+        if (!isPasswordValid) {
+            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+        }
+
+        // 새로운 게시글 생성
+        const newPost = new Post({
+            groupId,
+            nickname,
+            title,
+            content,
+            imageUrl,
+            tags,
+            location,
+            moment,
+            isPublic,
+            postPassword: hashedPassword,
+            
+        });
+
+        await newPost.save();
+        res.status(201).send({ message: '게시글이 성공적으로 등록되었습니다.', post: newPost });
+    } catch (error) {
+        res.status(400).send({ message: '게시글 등록 실패', error });
+    }
+});
 
