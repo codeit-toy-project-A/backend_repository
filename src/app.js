@@ -149,7 +149,6 @@ app.get('/api/groups', async (req, res) => {
             name: group.name,
             introduction: group.introduction,
             isPublic: group.isPublic,
-            dDay: Math.floor((Date.now() - new Date(group.createdAt)) / (1000 * 60 * 60 * 24)),  // 디데이 계산
             badgeCount: group.badges.length,
             postCount: group.postCount,
             likeCount: group.likeCount,
@@ -203,6 +202,30 @@ app.get('/api/groups/:groupId', async (req, res) => {
         });
     } catch (error) {
         res.status(400).send({ message: '그룹 상세 조회 실패', error });
+    }
+});
+
+// 조회 권한 확인
+
+app.get('/api/groups/:groupId/verify-password', async (req, res) => {
+    try {
+        const groupId = req.params;
+        const password = req.query;
+    
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+        }
+    
+        const isPasswordValid = await bcrypt.compare(password, group.password);
+        
+        if(!isPasswordValid) {
+            return res.status(401).send({ message: '비밀번호가 틀렸습니다.' });
+        }
+    
+        res.status(200).send({message : '비밀번호가 확인되었습니다.'});
+    } catch (error) {
+        res.status(400).send({ message: '권한 확인 실패', error });
     }
 });
 
@@ -280,4 +303,40 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
     }
 });
 
+// 게시글 생성
 
+// 게시글 조회
+
+// 게시글 목록 조회
+app.get('/api/groups/:groupId/posts', async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const { keyword, sortBy, isPublic } = req.query;
+
+        // 필터 및 검색 조건
+        let filter = { groupId };
+        if (isPublic !== undefined) filter.isPublic = isPublic === 'true';
+        if (keyword) filter.title = { $regex: keyword, $options: 'i' };  // 제목 검색
+
+        // 정렬 조건
+        let sortOption = {};
+        if (sortBy === 'latest') sortOption = { createdAt: -1 };  // 최신순
+        else if (sortBy === 'mostLiked') sortOption = { likes: -1 };  // 공감 많은순
+
+        // 게시글 목록 조회
+        const posts = await Post.find(filter).sort(sortOption);
+
+        // 게시물 수 
+        const totalPost = await Post.countDocuments(filter);
+
+        // 게시글 반환
+        res.status(200).send({
+            currentPage: 1, // 고정된 값
+            totalPages: 5,
+            totalPost,
+            data : posts,
+        });
+    } catch (error) {
+        res.status(400).send({ message: '게시글 목록 조회 실패', error });
+    }
+});
