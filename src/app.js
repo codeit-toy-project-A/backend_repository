@@ -194,10 +194,10 @@ app.get('/api/groups/:groupId', async (req, res) => {
             name: group.name,
             introduction: group.introduction,
             isPublic: group.isPublic,
-            dDay: dDay,
             badges: group.badges,
-            memoryCount: group.postCount,
+            postCount: group.postCount,
             likeCount: group.likeCount,
+            createdAt: group.createdAt,
             post: group.post,
         });
     } catch (error) {
