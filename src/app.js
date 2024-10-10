@@ -385,9 +385,9 @@ app.delete('/api/posts/:postId', async (req, res) => {
 app.put('/api/posts/:postId', async (req, res) => {
     try {
         const { postId } = req.params;  
-        const { postPassword, ...updateData } = req.body;  // 비밀번호와 수정할 데이터를 분리
+        const { postPassword, ...updateData } = req.body;  
 
-        // 그룹 찾기
+        // 게시물 찾기
         const post = await Post.findById(postId);
         if (!post) {
             return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
@@ -404,6 +404,106 @@ app.put('/api/posts/:postId', async (req, res) => {
 
         res.status(200).send({ message: '수정에 성공했습니다.', post: updatedPost });
     } catch (error) {
-        res.status(400).send({ message: '그룹 수정 실패', error });
+        res.status(400).send({ message: '게시물 수정 실패', error });
+    }
+});
+
+
+// 게시물 상세 조회
+app.get('/api/posts/:postId', async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const { postPassword } = req.query;
+
+        // 게시물 찾기
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+        }
+
+        // 비공개 그룹의 경우 비밀번호 확인
+        if (!post.isPublic) {
+            const isPasswordValid = await bcrypt.compare(postPassword, post.postPassword);
+            if (!isPasswordValid) {
+                return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+            }
+        }
+
+        res.status(200).send({
+            groupId : post.groupId,
+            nickname : post.nickname,
+            title : post.title,
+            content: post.content,
+            imageUrl : post.imageUrl,
+            tags : post.tags,
+            location : post.location,
+            moment : post.moment,
+            isPublic : post.isPublic,
+            likeCount : post.likeCount,
+            commentCount : post.commentCount,
+            createdAt : post.createdAt,
+        });
+    } catch (error) {
+        res.status(400).send({ message: '게시물 상세 조회 실패', error });
+    }
+});
+
+// 조회 권한 확인 (게시글)
+
+app.get('/api/posts/:postId/verify-password', async (req, res) => {
+    try {
+        const postId = req.params;
+        const postPassword = req.query;
+    
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+        }
+    
+        const isPasswordValid = await bcrypt.compare(postPassword, post.postPassword);
+        
+        if(!isPasswordValid) {
+            return res.status(401).send({ message: '비밀번호가 틀렸습니다.' });
+        }
+    
+        res.status(200).send({message : '비밀번호가 확인되었습니다.'});
+    } catch (error) {
+        res.status(400).send({ message: '권한 확인 실패', error });
+    }
+});
+
+// 공감 보내기
+app.post('/api/posts/:postId/like', async (req, res) => {
+    try {
+        const { postId } = req.params;
+
+        // 게시물의 likeCount를 1 증가
+        const post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { new: true });
+        if (!post) {
+            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+        }
+
+        res.status(200).send({ message: '공감이 추가되었습니다.', likeCount: group.likeCount });
+    } catch (error) {
+        res.status(400).send({ message: '공감 추가 실패', error });
+    }
+});
+
+// 게시글 공개 여부 확인
+
+app.get('/api/posts/:postId/is-public', async (req, res) => {
+    try {
+        const { postId } = req.params;
+
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+        }
+        
+        res.status(200).send({
+            isPublic : post.isPublic,
+        });
+    } catch (error) {
+        res.status(400).send({ message: '공감 추가 실패', error });
     }
 });
