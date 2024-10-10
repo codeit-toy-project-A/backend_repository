@@ -314,7 +314,9 @@ app.get('/api/groups/:groupId/posts', async (req, res) => {
         const { keyword, sortBy, isPublic } = req.query;
 
         // 필터 및 검색 조건
-        let filter = { groupId };
+        const objectGroupId = mongoose.Types.ObjectId(groupId);
+        let filter = { groupId: objectGroupId };
+        
         if (isPublic !== undefined) filter.isPublic = isPublic === 'true';
         if (keyword) filter.title = { $regex: keyword, $options: 'i' };  // 제목 검색
 
