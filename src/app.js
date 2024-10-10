@@ -340,13 +340,13 @@ app.get('/api/groups/:groupId/posts', async (req, res) => {
         }));
 
         // 게시물 수 
-        const totalPost = await Post.countDocuments(filter);
+        const totalItemCount = await Post.countDocuments(filter);
 
         // 게시글 반환
         res.status(200).send({
             currentPage: 1, // 고정된 값
             totalPages: 5,
-            totalPost,
+            totalItemCount,
             data : postList,
         });
     } catch (error) {
@@ -540,5 +540,87 @@ app.post('/api/posts/:postId/comments', async (req, res) => {
     } catch (error) {
         console.log(error); 
         res.status(400).send({ message: '댓글 등록 실패', error });
+    }
+});
+
+
+
+// 댓글 목록 조회
+app.get('/api/posts/:postId/comments', async (req, res) => {
+    try {
+        const { postId } = req.params;
+
+        const post = await Post.findById(postId);
+
+        if(!post) {
+            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+        }
+        const comments = await Comment.find({postId: postId});
+
+        const totalItemCount = await Comment.countDocuments({postId: postId});
+
+        // 댓글 반환
+        res.status(200).send({
+            currentPage: 1, // 고정된 값
+            totalPages: 5,
+            totalItemCount,
+            data : comments,
+        });
+    } catch (error) {
+        res.status(400).send({ message: '게시글 목록 조회 실패', error });
+    }
+});
+
+// 댓글 삭제
+app.delete('/api/comments/:commentId', async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { password } = req.body;
+
+        // 댓글 찾기
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            return res.status(404).send({ message: '댓글을 찾을 수 없습니다.' });
+        }
+
+        // 비밀번호 확인
+        const isPasswordValid = await bcrypt.compare(password, comment.password);
+        if (!isPasswordValid) {
+            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+        }
+        
+
+        // 게시글 삭제
+        await Comment.findByIdAndDelete(commentId);
+        res.status(200).send({ message: '댓글 삭제 성공' });
+    } catch (error) {
+        res.status(400).send({ message: '댓글 삭제 실패', error });
+    }
+});
+
+
+// 댓글 수정
+app.put('/api/comments/:commentId', async (req, res) => {
+    try {
+        const { commentId } = req.params;  
+        const { password, ...updateData } = req.body;  
+
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            return res.status(404).send({ message: '댓글을 찾을 수 없습니다.' });
+        }
+
+        // 비밀번호 검증
+        const isPasswordValid = await bcrypt.compare(password, comment.password); 
+        if (!isPasswordValid) {
+            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+        }
+
+        // 비밀번호 일치 시 수정
+        const updatedPost = await Comment.findByIdAndUpdate(commentId, updateData, { new: true });  
+
+        res.status(200).send({ message: '수정에 성공했습니다.', post: updatedPost });
+    } catch (error) {
+        res.status(400).send({ message: '게시물 수정 실패', error });
     }
 });
