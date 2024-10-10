@@ -7,6 +7,7 @@ import Group from './models/GroupSchema.js';
 import fs from 'fs';
 import bcrypt from 'bcrypt';
 import Post from './models/postSchema.js';
+import Comment from './models/CommentSchema.js';
 
 // MongoDB 연결
 mongoose.connect(DATABASE_URL)
@@ -473,6 +474,7 @@ app.get('/api/posts/:postId/verify-password', async (req, res) => {
 });
 
 // 공감 보내기
+
 app.post('/api/posts/:postId/like', async (req, res) => {
     try {
         const { postId } = req.params;
@@ -505,5 +507,38 @@ app.get('/api/posts/:postId/is-public', async (req, res) => {
         });
     } catch (error) {
         res.status(400).send({ message: '공감 추가 실패', error });
+    }
+});
+
+
+// -------------------------------------------------------- //
+
+// 댓글 기능
+
+// 댓글 생성 
+
+app.post('/api/posts/:postId/comments', async (req, res) => {
+    try {
+        const { nickname, content, password, } = req.body;
+        const { postId } = req.params;  
+
+        const hashedCommentPassword = password ? await bcrypt.hash(password, 10) : null;
+
+        const post = await Post.findById(postId); 
+        if (!post) {
+            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+        }
+      
+        const newComment = new Comment({
+            nickname : nickname,
+            content : content,
+            password : hashedCommentPassword,
+        });
+
+        await newComment.save();
+        res.status(201).send({ message: '댓글이 성공적으로 등록되었습니다.', comment: newComment });
+    } catch (error) {
+        console.log(error); 
+        res.status(400).send({ message: '댓글 등록 실패', error });
     }
 });
