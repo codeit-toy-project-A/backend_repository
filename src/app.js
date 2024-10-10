@@ -303,10 +303,6 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
     }
 });
 
-// 게시글 생성
-
-// 게시글 조회
-
 // 게시글 목록 조회
 app.get('/api/groups/:groupId/posts', async (req, res) => {
     try {
@@ -361,7 +357,7 @@ app.get('/api/groups/:groupId/posts', async (req, res) => {
 app.delete('/api/posts/:postId', async (req, res) => {
     try {
         const { postId } = req.params;
-        const { password } = req.body;
+        const { postPassword } = req.body;
 
         // 게시글 찾기
         const post = await Post.findById(postId);
@@ -370,8 +366,8 @@ app.delete('/api/posts/:postId', async (req, res) => {
         }
 
         // 비공개 글일 경우 비밀번호 확인
-        if (!post.isPublic && password) {
-            const isPasswordValid = await bcrypt.compare(password, post.password);
+        if (!post.isPublic && postPassword) {
+            const isPasswordValid = await bcrypt.compare(postPassword, post.postPassword);
             if (!isPasswordValid) {
                 return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
             }
@@ -382,5 +378,32 @@ app.delete('/api/posts/:postId', async (req, res) => {
         res.status(200).send({ message: '게시글 삭제 성공' });
     } catch (error) {
         res.status(400).send({ message: '게시글 삭제 실패', error });
+    }
+});
+
+// 게시글 수정
+app.put('/api/posts/:postId', async (req, res) => {
+    try {
+        const { postId } = req.params;  
+        const { postPassword, ...updateData } = req.body;  // 비밀번호와 수정할 데이터를 분리
+
+        // 그룹 찾기
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+        }
+
+        // 비밀번호 검증
+        const isPasswordValid = await bcrypt.compare(postPassword, post.postPassword); // 해시된 비밀번호 비교
+        if (!isPasswordValid) {
+            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+        }
+
+        // 비밀번호 일치 시 수정
+        const updatedPost = await Post.findByIdAndUpdate(postId, updateData, { new: true });  
+
+        res.status(200).send({ message: '수정에 성공했습니다.', post: updatedPost });
+    } catch (error) {
+        res.status(400).send({ message: '그룹 수정 실패', error });
     }
 });
