@@ -314,19 +314,33 @@ app.get('/api/groups/:groupId/posts', async (req, res) => {
         const { keyword, sortBy, isPublic } = req.query;
 
         // 필터 및 검색 조건
-        const objectGroupId = mongoose.Types.ObjectId(groupId);
-        let filter = { groupId: objectGroupId };
-        
+        let filter = {};
+
         if (isPublic !== undefined) filter.isPublic = isPublic === 'true';
         if (keyword) filter.title = { $regex: keyword, $options: 'i' };  // 제목 검색
 
         // 정렬 조건
         let sortOption = {};
         if (sortBy === 'latest') sortOption = { createdAt: -1 };  // 최신순
-        else if (sortBy === 'mostLiked') sortOption = { likes: -1 };  // 공감 많은순
+        else if (sortBy === 'mostLiked') sortOption = { likeCount: -1 };  // 공감 많은순
+        else if (sortBy === 'mostCommented') sortOption = { commentCount: -1 };  // 공감 많은순
 
-        // 게시글 목록 조회
-        const posts = await Post.find(filter).sort(sortOption);
+        const posts = await Post.find(filter).sort(sortOption);  // 그룹 목록 조회
+
+        // 필요한 필드만 반환
+        const postList = posts.map(post => ({
+            id: post._id,
+            nickname: post.nickname,
+            title: post.title,
+            imageUrl: post.imageUrl,
+            tags: post.tags,
+            location: post.location,
+            moment: post.moment,
+            isPublic: post.isPublic,
+            likeCount: post.likeCount,
+            commentCount: post.commentCount,
+            createdAt: post.createdAt,
+        }));
 
         // 게시물 수 
         const totalPost = await Post.countDocuments(filter);
@@ -336,7 +350,7 @@ app.get('/api/groups/:groupId/posts', async (req, res) => {
             currentPage: 1, // 고정된 값
             totalPages: 5,
             totalPost,
-            data : posts,
+            data : postList,
         });
     } catch (error) {
         res.status(400).send({ message: '게시글 목록 조회 실패', error });
