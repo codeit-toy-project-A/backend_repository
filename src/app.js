@@ -356,3 +356,31 @@ app.get('/api/groups/:groupId/posts', async (req, res) => {
         res.status(400).send({ message: '게시글 목록 조회 실패', error });
     }
 });
+
+// 게시글 삭제
+app.delete('/api/posts/:postId', async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const { password } = req.body;
+
+        // 게시글 찾기
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).send({ message: '게시글을 찾을 수 없습니다.' });
+        }
+
+        // 비공개 글일 경우 비밀번호 확인
+        if (!post.isPublic && password) {
+            const isPasswordValid = await bcrypt.compare(password, post.password);
+            if (!isPasswordValid) {
+                return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+            }
+        }
+
+        // 게시글 삭제
+        await Post.findByIdAndDelete(postId);
+        res.status(200).send({ message: '게시글 삭제 성공' });
+    } catch (error) {
+        res.status(400).send({ message: '게시글 삭제 실패', error });
+    }
+});
