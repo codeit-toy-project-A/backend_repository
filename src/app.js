@@ -8,6 +8,7 @@ import fs from 'fs';
 import bcrypt from 'bcrypt';
 import Post from './models/postSchema.js';
 import Comment from './models/CommentSchema.js';
+import cors from 'cors';
 
 // MongoDB 연결
 mongoose.connect(DATABASE_URL)
@@ -15,8 +16,11 @@ mongoose.connect(DATABASE_URL)
 
 const app = express();
 
+
+
 // JSON 데이터 파싱
 app.use(express.json());
+app.use(cors());
 
 // 업로드 폴더 확인 및 생성
 const uploadDir = path.resolve('./uploads');  // 절대 경로로 설정
