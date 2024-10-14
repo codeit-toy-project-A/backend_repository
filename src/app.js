@@ -569,7 +569,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
             currentPage: 1, // 고정된 값
             totalPages: 5,
             totalItemCount,
-            data : comments,
+            data : [comments._id, comments.nickname, comments.content, comments.createdAt], 
         });
     } catch (error) {
         res.status(400).send({ message: '댓글 목록 조회 실패', error });
