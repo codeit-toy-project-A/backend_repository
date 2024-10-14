@@ -534,6 +534,7 @@ app.post('/api/posts/:postId/comments', async (req, res) => {
         }
       
         const newComment = new Comment({
+            postId: postId,
             nickname : nickname,
             content : content,
             password : hashedCommentPassword,
@@ -571,7 +572,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
             data : comments,
         });
     } catch (error) {
-        res.status(400).send({ message: '게시글 목록 조회 실패', error });
+        res.status(400).send({ message: '댓글 목록 조회 실패', error });
     }
 });
 
