@@ -564,13 +564,22 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
 
         const totalItemCount = await Comment.countDocuments({postId: postId});
 
+        // 필요한 필드만 추출하여 새로운 배열로 변환
+        const commentData = comments.map(comment => ({
+            id: comment._id,
+            nickname: comment.nickname,
+            content: comment.content,
+            createdAt: comment.createdAt,
+        }));
+
         // 댓글 반환
         res.status(200).send({
             currentPage: 1, // 고정된 값
             totalPages: 5,
             totalItemCount,
-            data : [comments._id, comments.nickname, comments.content, comments.createdAt], 
+            data : commentData,
         });
+        
     } catch (error) {
         res.status(400).send({ message: '댓글 목록 조회 실패', error });
     }
