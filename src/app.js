@@ -40,6 +40,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// 정적 파일 제공 (이미지 파일 접근 가능하게)
+app.use('/uploads', express.static('uploads'));
+
+// 서버 시작
+app.listen(3000, () => console.log('Server Started'));
+
 // 그룹 생성 요청 처리 (이미지 업로드 포함)
 app.post('/api/groups', upload.single('image'), async (req, res) => {
     try {
@@ -57,9 +63,9 @@ app.post('/api/groups', upload.single('image'), async (req, res) => {
         const newGroup = new Group(groupData);
         await newGroup.save();
 
-        res.status(201).send({ message: '그룹 생성 성공', group: newGroup });
+        res.status(201).send({ group: newGroup });
     } catch (error) {
-        res.status(400).send({ message: '그룹 생성 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 // 그룹 수정
@@ -71,21 +77,21 @@ app.put('/api/groups/:groupId', async (req, res) => {
         // 그룹 찾기
         const group = await Group.findById(groupId);  // groupId 사용
         if (!group) {
-            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
 
         // 비밀번호 검증
         const isPasswordValid = await bcrypt.compare(password, group.password); // 해시된 비밀번호 비교
         if (!isPasswordValid) {
-            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+            return res.status(403).send({ message: '비밀번호가 틀렸습니다' });
         }
 
         // 비밀번호 일치 시 수정
         const updatedGroup = await Group.findByIdAndUpdate(groupId, updateData, { new: true });  // groupId 사용
 
-        res.status(200).send({ message: '수정에 성공했습니다.', group: updatedGroup });
+        res.status(200).send({ group: updatedGroup });
     } catch (error) {
-        res.status(400).send({ message: '그룹 수정 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -98,13 +104,13 @@ app.delete('/api/groups/:groupId', async (req, res) => {
         // 그룹 찾기
         const group = await Group.findById(groupId);  // groupId 사용
         if (!group) {
-            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
 
         // 비밀번호 검증
         const isPasswordValid = await bcrypt.compare(password, group.password); // 해시된 비밀번호 비교
         if (!isPasswordValid) {
-            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+            return res.status(403).send({ message: '비밀번호가 틀렸습니다' });
         }
 
         // 비밀번호 일치 시 삭제
@@ -112,7 +118,7 @@ app.delete('/api/groups/:groupId', async (req, res) => {
 
         res.status(200).send({ message: '그룹 삭제 성공' });
     } catch (error) {
-        res.status(400).send({ message: '그룹 삭제 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -168,7 +174,7 @@ app.get('/api/groups', async (req, res) => {
             data: groupList  // 그룹 목록
         });
     } catch (error) {
-        res.status(400).send({ message: '그룹 목록 조회 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -181,14 +187,14 @@ app.get('/api/groups/:groupId', async (req, res) => {
         // 그룹 찾기
         const group = await Group.findById(groupId);
         if (!group) {
-            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
 
         // 비공개 그룹의 경우 비밀번호 확인
         if (!group.isPublic) {
             const isPasswordValid = await bcrypt.compare(password, group.password);
             if (!isPasswordValid) {
-                return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+                return res.status(403).send({ message: '비밀번호가 틀렸습니다' });
             }
         }
 
@@ -206,7 +212,7 @@ app.get('/api/groups/:groupId', async (req, res) => {
             post: group.post,
         });
     } catch (error) {
-        res.status(400).send({ message: '그룹 상세 조회 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -219,18 +225,18 @@ app.get('/api/groups/:groupId/verify-password', async (req, res) => {
     
         const group = await Group.findById(groupId);
         if (!group) {
-            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
     
         const isPasswordValid = await bcrypt.compare(password, group.password);
         
         if(!isPasswordValid) {
-            return res.status(401).send({ message: '비밀번호가 틀렸습니다.' });
+            return res.status(401).send({ message: '비밀번호가 틀렸습니다' });
         }
     
-        res.status(200).send({message : '비밀번호가 확인되었습니다.'});
+        res.status(200).send({message : '비밀번호가 확인되었습니다'});
     } catch (error) {
-        res.status(400).send({ message: '권한 확인 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -242,21 +248,16 @@ app.post('/api/groups/:groupId/like', async (req, res) => {
         // 그룹의 likeCount를 1 증가
         const group = await Group.findByIdAndUpdate(groupId, { $inc: { likeCount: 1 } }, { new: true });
         if (!group) {
-            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
 
-        res.status(200).send({ message: '공감이 추가되었습니다.', likeCount: group.likeCount });
+        res.status(200).send({ message: '그룹 공감하기 성공', likeCount: group.likeCount });
     } catch (error) {
         res.status(400).send({ message: '공감 추가 실패', error });
     }
 });
 
-// 정적 파일 제공 (이미지 파일 접근 가능하게)
-app.use('/uploads', express.static('uploads'));
 
-
-// 서버 시작
-app.listen(3000, () => console.log('Server Started'));
 
 // -------------------------------------------------------- //
 
@@ -275,16 +276,13 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
 
         const group = await Group.findById(groupId); 
         if (!group) {
-            return res.status(404).send({ message: '그룹을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
-        
-        console.log('Group Password:', group.password);
-        console.log('Provided Group Password:', groupPassword);
 
         const isPasswordValid = await bcrypt.compare(groupPassword, group.password);
 
         if (!isPasswordValid) {
-            return res.status(403).send({ message: '그룹 비밀번호가 일치하지 않습니다.' });
+            return res.status(403).send({ message: '비밀번호가 틀렸습니다' });
         }
 
         const newPost = new Post({
@@ -301,10 +299,10 @@ app.post('/api/groups/:groupId/posts', async (req, res) => {
         });
 
         await newPost.save();
-        res.status(201).send({ message: '게시글이 성공적으로 등록되었습니다.', post: newPost });
+        res.status(201).send({ post: newPost });
     } catch (error) {
         console.log(error); 
-        res.status(400).send({ message: '게시글 등록 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -367,14 +365,14 @@ app.delete('/api/posts/:postId', async (req, res) => {
         // 게시글 찾기
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).send({ message: '게시글을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
 
         // 비공개 글일 경우 비밀번호 확인
         if (!post.isPublic && postPassword) {
             const isPasswordValid = await bcrypt.compare(postPassword, post.postPassword);
             if (!isPasswordValid) {
-                return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+                return res.status(403).send({ message: '비밀번호가 틀렸습니다' });
             }
         }
 
@@ -382,7 +380,7 @@ app.delete('/api/posts/:postId', async (req, res) => {
         await Post.findByIdAndDelete(postId);
         res.status(200).send({ message: '게시글 삭제 성공' });
     } catch (error) {
-        res.status(400).send({ message: '게시글 삭제 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -395,21 +393,21 @@ app.put('/api/posts/:postId', async (req, res) => {
         // 게시물 찾기
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
 
         // 비밀번호 검증
         const isPasswordValid = await bcrypt.compare(postPassword, post.postPassword); // 해시된 비밀번호 비교
         if (!isPasswordValid) {
-            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+            return res.status(403).send({ message: '비밀번호가 틀렸습니다' });
         }
 
         // 비밀번호 일치 시 수정
         const updatedPost = await Post.findByIdAndUpdate(postId, updateData, { new: true });  
 
-        res.status(200).send({ message: '수정에 성공했습니다.', post: updatedPost });
+        res.status(200).send({ post: updatedPost });
     } catch (error) {
-        res.status(400).send({ message: '게시물 수정 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -423,14 +421,14 @@ app.get('/api/posts/:postId', async (req, res) => {
         // 게시물 찾기
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
 
         // 비공개 그룹의 경우 비밀번호 확인
         if (!post.isPublic) {
             const isPasswordValid = await bcrypt.compare(postPassword, post.postPassword);
             if (!isPasswordValid) {
-                return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+                return res.status(403).send({ message: '비밀번호가 틀렸습니다' });
             }
         }
 
@@ -449,7 +447,7 @@ app.get('/api/posts/:postId', async (req, res) => {
             createdAt : post.createdAt,
         });
     } catch (error) {
-        res.status(400).send({ message: '게시물 상세 조회 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -462,18 +460,18 @@ app.get('/api/posts/:postId/verify-password', async (req, res) => {
     
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
     
         const isPasswordValid = await bcrypt.compare(postPassword, post.postPassword);
         
         if(!isPasswordValid) {
-            return res.status(401).send({ message: '비밀번호가 틀렸습니다.' });
+            return res.status(401).send({ message: '비밀번호가 틀렸습니다' });
         }
     
         res.status(200).send({message : '비밀번호가 확인되었습니다.'});
     } catch (error) {
-        res.status(400).send({ message: '권한 확인 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -486,12 +484,12 @@ app.post('/api/posts/:postId/like', async (req, res) => {
         // 게시물의 likeCount를 1 증가
         const post = await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { new: true });
         if (!post) {
-            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
 
-        res.status(200).send({ message: '공감이 추가되었습니다.', likeCount: group.likeCount });
+        res.status(200).send({ message: '게시글 공감하기 성공', likeCount: group.likeCount });
     } catch (error) {
-        res.status(400).send({ message: '공감 추가 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -503,14 +501,15 @@ app.get('/api/posts/:postId/is-public', async (req, res) => {
 
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
         
         res.status(200).send({
+            id : post._id,
             isPublic : post.isPublic,
         });
     } catch (error) {
-        res.status(400).send({ message: '공감 추가 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -530,7 +529,7 @@ app.post('/api/posts/:postId/comments', async (req, res) => {
 
         const post = await Post.findById(postId); 
         if (!post) {
-            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
       
         const newComment = new Comment({
@@ -541,10 +540,10 @@ app.post('/api/posts/:postId/comments', async (req, res) => {
         });
 
         await newComment.save();
-        res.status(201).send({ message: '댓글이 성공적으로 등록되었습니다.', comment: newComment });
+        res.status(201).send({ comment: newComment });
     } catch (error) {
         console.log(error); 
-        res.status(400).send({ message: '댓글 등록 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -558,7 +557,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
         const post = await Post.findById(postId);
 
         if(!post) {
-            return res.status(404).send({ message: '게시물을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
         const comments = await Comment.find({postId: postId});
 
@@ -579,9 +578,9 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
             totalItemCount,
             data : commentData,
         });
-        
+
     } catch (error) {
-        res.status(400).send({ message: '댓글 목록 조회 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
@@ -594,21 +593,21 @@ app.delete('/api/comments/:commentId', async (req, res) => {
         // 댓글 찾기
         const comment = await Comment.findById(commentId);
         if (!comment) {
-            return res.status(404).send({ message: '댓글을 찾을 수 없습니다.' });
+            return res.status(404).send({ message: '존재하지 않습니다' });
         }
 
         // 비밀번호 확인
         const isPasswordValid = await bcrypt.compare(password, comment.password);
         if (!isPasswordValid) {
-            return res.status(403).send({ message: '비밀번호가 일치하지 않습니다.' });
+            return res.status(403).send({ message: '비밀번호가 틀렸습니다.' });
         }
         
 
         // 게시글 삭제
         await Comment.findByIdAndDelete(commentId);
-        res.status(200).send({ message: '댓글 삭제 성공' });
+        res.status(200).send({ message: '답글 삭제 성공' });
     } catch (error) {
-        res.status(400).send({ message: '댓글 삭제 실패', error });
+        res.status(400).send({ message: '잘못된 요청입니다', error });
     }
 });
 
